@@ -1,0 +1,124 @@
+import java.awt.EventQueue;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JTabbedPane;
+import javax.swing.JButton;
+import javax.swing.JTable;
+import javax.swing.JScrollPane;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
+public class AdminPanel extends JFrame {
+
+    private static final long serialVersionUID = 1L;
+    private JPanel contentPane;
+    private JTable table;
+    private DefaultTableModel model;
+
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    AdminPanel frame = new AdminPanel();
+                    frame.setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public AdminPanel() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 850, 550);
+
+        contentPane = new JPanel();
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        contentPane.setLayout(new BorderLayout());
+        setContentPane(contentPane);
+
+        JTabbedPane tabbedPane = new JTabbedPane();
+        contentPane.add(tabbedPane, BorderLayout.CENTER);
+
+        tabbedPane.addTab("Manage Users", new JPanel());
+        tabbedPane.addTab("Manage Artworks", new JPanel());
+
+        JPanel panel_2 = new JPanel(new BorderLayout());
+        tabbedPane.addTab("Manage Commissions", panel_2);
+
+        String[] columns = {"Client", "Artist", "Category", "Budget", "Deadline", "Status"};
+        model = new DefaultTableModel(columns, 0);
+        table = new JTable(model);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        panel_2.add(scrollPane, BorderLayout.CENTER);
+
+        JButton deleteBtn = new JButton("Delete Selected Commission");
+        JButton refreshBtn = new JButton("Refresh");
+        JButton logoutBtn = new JButton("Logout");
+
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftPanel.add(deleteBtn);
+        leftPanel.add(refreshBtn);
+
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(leftPanel, BorderLayout.WEST);
+        bottomPanel.add(logoutBtn, BorderLayout.EAST);
+
+        panel_2.add(bottomPanel, BorderLayout.SOUTH);
+
+
+        deleteBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int row = table.getSelectedRow();
+
+                if (row != -1) {
+                    int confirm = JOptionPane.showConfirmDialog(
+                        AdminPanel.this,
+                        "Are you sure you want to delete this commission?",
+                        "Confirm Delete",
+                        JOptionPane.YES_NO_OPTION
+                    );
+
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        model.removeRow(row);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(AdminPanel.this, "Select a row first!");
+                }
+            }
+        });
+
+        refreshBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(AdminPanel.this, "Refreshed!");
+            }
+        });
+
+        logoutBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int confirm = JOptionPane.showConfirmDialog(
+                    AdminPanel.this,
+                    "Are you sure you want to logout?",
+                    "Logout",
+                    JOptionPane.YES_NO_OPTION
+                );
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    dispose();
+                    JOptionPane.showMessageDialog(null, "Logged out!");
+                    new LoginForm().setVisible(true);                }
+            }
+        });
+
+        tabbedPane.addTab("Reports", new JPanel());
+    }
+}
+
+
