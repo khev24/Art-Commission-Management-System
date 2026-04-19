@@ -1,0 +1,141 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class SubmitRequestPanel extends JPanel {
+
+    private SystemManager system = SystemManager.getInstance();
+    private User loggedInUser;
+
+    private JComboBox<String> artistComboBox;
+    private JComboBox<String> categoryComboBox;
+
+    private JTextArea descriptionArea;
+    private JTextField budgetField;
+    private JTextField deadlineField;
+
+    private JButton submitButton;
+
+    public SubmitRequestPanel(User user) {
+        this.loggedInUser = user;
+
+        setLayout(null);
+
+        initUI();
+        loadArtists();
+        addAction();
+    }
+
+    private void initUI() {
+
+        JLabel title = new JLabel("Submit Commission Request");
+        title.setFont(new Font("Tahoma", Font.BOLD, 16));
+        title.setBounds(250, 20, 300, 25);
+        add(title);
+
+        // Artist
+        JLabel artistLabel = new JLabel("Artist:");
+        artistLabel.setBounds(200, 70, 100, 20);
+        add(artistLabel);
+
+        artistComboBox = new JComboBox<>();
+        artistComboBox.setBounds(320, 70, 200, 22);
+        add(artistComboBox);
+
+        // Category
+        JLabel categoryLabel = new JLabel("Category:");
+        categoryLabel.setBounds(200, 110, 100, 20);
+        add(categoryLabel);
+
+        categoryComboBox = new JComboBox<>();
+        categoryComboBox.setBounds(320, 110, 200, 22);
+        categoryComboBox.addItem("Anime");
+        categoryComboBox.addItem("Realism");
+        categoryComboBox.addItem("Digital Art");
+        categoryComboBox.addItem("Portrait");
+        add(categoryComboBox);
+
+        // Description
+        JLabel descLabel = new JLabel("Description:");
+        descLabel.setBounds(200, 150, 100, 20);
+        add(descLabel);
+
+        descriptionArea = new JTextArea();
+        descriptionArea.setBounds(320, 150, 200, 60);
+        add(descriptionArea);
+
+        // Budget
+        JLabel budgetLabel = new JLabel("Budget:");
+        budgetLabel.setBounds(200, 230, 100, 20);
+        add(budgetLabel);
+
+        budgetField = new JTextField();
+        budgetField.setBounds(320, 230, 200, 22);
+        add(budgetField);
+
+        // Deadline
+        JLabel deadlineLabel = new JLabel("Deadline:");
+        deadlineLabel.setBounds(200, 270, 100, 20);
+        add(deadlineLabel);
+
+        deadlineField = new JTextField();
+        deadlineField.setBounds(320, 270, 200, 22);
+        add(deadlineField);
+
+        // Submit Button
+        submitButton = new JButton("Submit Request");
+        submitButton.setBounds(320, 320, 200, 30);
+        add(submitButton);
+    }
+
+    private void loadArtists() {
+        artistComboBox.removeAllItems();
+
+        for (User u : system.getArtists()) {
+            artistComboBox.addItem(u.getUsername());
+        }
+    }
+
+    private void addAction() {
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                submitRequest();
+            }
+        });
+    }
+
+    private void submitRequest() {
+
+        try {
+            String artist = (String) artistComboBox.getSelectedItem();
+            String category = (String) categoryComboBox.getSelectedItem();
+            String description = descriptionArea.getText();
+
+            double budget = Double.parseDouble(budgetField.getText());
+            String deadline = deadlineField.getText();
+
+            CommissionRequest request = new CommissionRequest(
+                    loggedInUser.getUsername(),
+                    artist,
+                    category,
+                    description,
+                    budget,
+                    deadline
+            );
+
+            system.addCommission(request);
+
+            JOptionPane.showMessageDialog(this, "Request submitted successfully!");
+
+            // clear fields
+            descriptionArea.setText("");
+            budgetField.setText("");
+            deadlineField.setText("");
+
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid budget value!");
+        }
+    }
+}
