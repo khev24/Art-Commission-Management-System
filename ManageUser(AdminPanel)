@@ -1,0 +1,84 @@
+package sheena;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+
+public class AdminPanel extends JFrame {
+    private JTable userTable;
+    private DefaultTableModel tableModel;
+
+    public AdminPanel() {
+        setTitle("Admin Panel - User Management");
+        setSize(600, 400);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null); // Center on screen
+        setLayout(new BorderLayout(10, 10));
+
+        // Table Setup
+        String[] columns = {"ID", "Name", "Email"};
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        
+        userTable = new JTable(tableModel);
+        add(new JScrollPane(userTable), BorderLayout.CENTER);
+
+        // Control Panel
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnAdd = new JButton("Add User");
+        JButton btnDelete = new JButton("Delete Selected User");
+
+        btnAdd.addActionListener(e -> openAddUserDialog());
+        btnDelete.addActionListener(e -> deleteUser());
+
+        btnPanel.add(btnAdd);
+        btnPanel.add(btnDelete);
+        add(btnPanel, BorderLayout.SOUTH);
+    }
+
+    private void openAddUserDialog() {
+        JTextField txtId = new JTextField();
+        JTextField txtName = new JTextField();
+        JTextField txtEmail = new JTextField();
+
+        Object[] message = {
+            "ID:", txtId,
+            "Name:", txtName ,
+            "Email:", txtEmail
+        };
+
+        int option = JOptionPane.showConfirmDialog(null, message, "Add New User", JOptionPane.OK_CANCEL_OPTION);
+        
+        if (option == JOptionPane.OK_OPTION) {
+            if (!txtId.getText().isEmpty() && !txtName.getText().isEmpty()) {
+                User newUser = new User(txtId.getText(), txtName.getText(), txtEmail.getText());
+                tableModel.addRow(newUser.toArray());
+            } else {
+                JOptionPane.showMessageDialog(this, "Fields cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void deleteUser() {
+        int selectedRow = userTable.getSelectedRow();
+        if (selectedRow != -1) {
+            int confirm = JOptionPane.showConfirmDialog(this, "Are you sure?", "Delete User", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                tableModel.removeRow(selectedRow);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a row first.");
+        }
+    }
+
+    public static void main(String[] args) {
+        // Apply System Look and Feel for a cleaner UI
+        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (Exception ignored) {}
+        
+        SwingUtilities.invokeLater(() -> new AdminPanel().setVisible(true));
+    }
+}
