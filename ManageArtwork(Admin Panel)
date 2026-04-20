@@ -1,0 +1,90 @@
+package ArtCommissionManagementSystem;
+
+import java.awt.BorderLayout;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+
+public class ManageArtwork extends JFrame {
+
+    private JTable table;
+    private DefaultTableModel tableModel;
+    private SystemManager manager;
+
+    public ManageArtwork() {
+
+        manager = SystemManager.getInstance();
+
+        setTitle("Manage Artworks");
+        setSize(700, 400);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        tableModel = new DefaultTableModel(
+                new String[]{"Title", "Category", "Artist"}, 0
+        );
+
+        table = new JTable(tableModel);
+        JScrollPane scrollPane = new JScrollPane(table);
+
+        JButton deleteButton = new JButton("Delete Selected Artwork");
+        JButton refreshButton = new JButton("Refresh");
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.add(deleteButton);
+        bottomPanel.add(refreshButton);
+
+        setLayout(new BorderLayout());
+        add(scrollPane, BorderLayout.CENTER);
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        deleteButton.addActionListener(e -> {
+
+            int selectedRow = table.getSelectedRow();
+
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(this, "Please select an artwork to delete.");
+                return;
+            }
+
+            String title = tableModel.getValueAt(selectedRow, 0).toString();
+            String artist = tableModel.getValueAt(selectedRow, 2).toString();
+
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to delete this artwork?",
+                    "Confirm Delete",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            if (confirm == JOptionPane.YES_OPTION) {
+
+                boolean removed = manager.removeArtwork(title, artist);
+
+                if (removed) {
+                    tableModel.removeRow(selectedRow);
+                    JOptionPane.showMessageDialog(this, "Artwork deleted successfully.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Failed to delete artwork.");
+                }
+            }
+        });
+
+        refreshButton.addActionListener(e -> refreshTable());
+    }
+
+    private void refreshTable() {
+        tableModel.setRowCount(0);
+
+        for (Artwork a : manager.getArtworks()) {
+            tableModel.addRow(new Object[]{
+                    a.getTitle(),
+                    a.getCategory(),
+                    a.getArtistUsername()
+            });
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new ManageArtwork().setVisible(true));
+    }
+}
